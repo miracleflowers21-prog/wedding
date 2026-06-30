@@ -84,7 +84,6 @@ function buildCerts() {
     var card = document.createElement('div');
     card.className = 'cert-card';
     card.dataset.amount = c.amount;
-    card.onclick = function () { selectCert(this); };
     card.innerHTML =
       '<div class="cert-img-wrap"><img class="cert-img" id="certImg' + i + '" src="' + (c.img || 'assets/cert-1.jpg') + '" alt=""/></div>' +
       '<div class="cert-price" id="certPrice' + i + '" style="font-size:' + (D.priceSize || 34) + 'px">' + fmt + ' ₽</div>' +
@@ -92,58 +91,68 @@ function buildCerts() {
       '<div><span class="cert-tag" id="certTag' + i + '">' + c.tag + '</span></div>' +
       '<div class="qty-wrap" onclick="event.stopPropagation()">' +
         '<button class="qty-btn" onclick="chQty(this,-1)">−</button>' +
-        '<div class="qty-val">1</div>' +
+        '<div class="qty-val">0</div>' +
         '<button class="qty-btn" onclick="chQty(this,1)">+</button>' +
       '</div>' +
-      '<button class="cert-buy-btn" onclick="event.stopPropagation();selectCert(this.closest(\'.cert-card\'))">Купить</button>';
+      '<button class="cert-buy-btn" onclick="event.stopPropagation();addCert(this.closest(\'.cert-card\'))">Купить</button>';
     grid.appendChild(card);
   });
 }
 
-// ── Cert selection ─────────────────────────────────────────────────────────
-function selectCert(el) {
-  document.querySelectorAll('.cert-card').forEach(function (c) { c.classList.remove('selected'); });
-  el.classList.add('selected');
-  selAmt = el.dataset.amount;
-  selQty = parseInt(el.querySelector('.qty-val').textContent) || 1;
+// ── Cart helpers ──────────────────────────────────────────────────────────
+function addCert(card) {
+  var qv = card.querySelector('.qty-val');
+  qv.textContent = (parseInt(qv.textContent) || 0) + 1;
+  card.classList.add('selected');
   updateSum();
   var form = document.getElementById('order-form');
   if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function getTotal() {
+  var total = 0;
+  document.querySelectorAll('.cert-card').forEach(function (card) {
+    var qty = parseInt(card.querySelector('.qty-val').textContent) || 0;
+    total += qty * (parseInt(card.dataset.amount) || 0);
+  });
+  return total;
+}
+
+function getOrderSummary() {
+  var parts = [];
+  document.querySelectorAll('.cert-card').forEach(function (card, i) {
+    var qty = parseInt(card.querySelector('.qty-val').textContent) || 0;
+    if (qty > 0 && D.certs && D.certs[i]) {
+      parts.push(qty + '×' + parseInt(card.dataset.amount).toLocaleString('ru-RU') + ' ₽ (' + D.certs[i].tag + ')');
+    }
+  });
+  return parts.join(', ');
+}
+
 function chQty(btn, d) {
   var w = btn.parentElement, v = w.querySelector('.qty-val');
-  var n = Math.max(1, (parseInt(v.textContent) || 1) + d);
+  var n = Math.max(0, (parseInt(v.textContent) || 0) + d);
   v.textContent = n;
   var card = w.closest('.cert-card');
-  if (card && card.classList.contains('selected')) { selQty = n; updateSum(); }
+  if (card) card.classList.toggle('selected', n > 0);
+  updateSum();
 }
 
 function updateSum() {
+  var total = getTotal();
   var lbl   = document.getElementById('selLabel');
   var price = document.getElementById('selPrice');
   var disp  = document.getElementById('selDisplay');
-  if (!selAmt) {
-    if (lbl) lbl.textContent = 'Выберите сертификат выше ↑';
+  if (total === 0) {
+    if (lbl)  lbl.textContent = 'Выберите сертификат выше ↑';
     if (price) price.textContent = '';
     if (disp) disp.classList.remove('has-selection');
     return;
   }
-  var t = parseInt(selAmt) * selQty;
-  if (lbl) lbl.textContent = selQty > 1 ? selQty + ' × ' + parseInt(selAmt).toLocaleString('ru-RU') + ' ₽' : 'Сертификат';
-  if (price) price.textContent = t.toLocaleString('ru-RU') + ' ₽';
+  var summary = getOrderSummary();
+  if (lbl)  lbl.textContent = summary;
+  if (price) price.textContent = total.toLocaleString('ru-RU') + ' ₽';
   if (disp) disp.classList.add('has-selection');
-}
-
-function syncSel(s) {
-  selAmt = s.value || null;
-  if (!selAmt) return;
-  document.querySelectorAll('.cert-card').forEach(function (c) {
-    var match = c.dataset.amount === selAmt;
-    c.classList.toggle('selected', match);
-    if (match) selQty = parseInt(c.querySelector('.qty-val').textContent) || 1;
-  });
-  updateSum();
 }
 
 // ── Payment flow ──────────────────────────────────────────────────────────
@@ -154,15 +163,19 @@ function submitForm() {
   var trap  = (document.getElementById('_trap')  || {}).value || '';
 
   if (trap) return; // honeypot triggered
-  if (!name.trim() || !phone.trim() || !email.trim() || !selAmt) {
-    alert('Пожалуйста, заполните имя, телефон, email и выберите сертификат.');
+  if (!name.trim() || !phone.trim() || !email.trim()) {
+    alert('Пожалуйста, заполните имя, телефон и email.');
+    return;
+  }
+  if (getTotal() === 0) {
+    alert('Пожалуйста, выберите хотя бы один сертификат.');
     return;
   }
   openPayModal();
 }
 
 function openPayModal() {
-  var total = selAmt ? parseInt(selAmt) * selQty : 0;
+  var total = getTotal();
   var amtEl = document.getElementById('payModalAmount');
   if (amtEl) amtEl.innerHTML = '<strong>' + (total > 0 ? total.toLocaleString('ru-RU') + ' ₽' : '—') + '</strong>';
   _payMethod = null;
@@ -217,7 +230,8 @@ function _submitToFormspree(paymentMethod) {
   var phone   = (document.getElementById('gPhone') || {}).value || '—';
   var email   = (document.getElementById('gEmail') || {}).value || '—';
   var msg     = (document.getElementById('gMsg')   || {}).value || '—';
-  var total   = selAmt ? parseInt(selAmt) * selQty : 0;
+  var total   = getTotal();
+  var summary = getOrderSummary();
 
   var url = (window.landingConfig && window.landingConfig.formspreeUrl) || 'https://formspree.io/f/xeewabvz';
 
@@ -229,6 +243,7 @@ function _submitToFormspree(paymentMethod) {
       Имя: name,
       Телефон: phone,
       Email: email,
+      Состав: summary,
       Итого: total.toLocaleString('ru-RU') + ' ₽',
       'Способ оплаты': paymentMethod,
       Пожелание: msg
