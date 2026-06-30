@@ -102,9 +102,11 @@ function buildCerts() {
 // ── Cart helpers ──────────────────────────────────────────────────────────
 function addCert(card) {
   var qv = card.querySelector('.qty-val');
-  qv.textContent = (parseInt(qv.textContent) || 0) + 1;
-  card.classList.add('selected');
-  updateSum();
+  if ((parseInt(qv.textContent) || 0) === 0) {
+    qv.textContent = 1;
+    card.classList.add('selected');
+    updateSum();
+  }
   var form = document.getElementById('order-form');
   if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -232,6 +234,9 @@ function _submitToFormspree(paymentMethod) {
   var msg     = (document.getElementById('gMsg')   || {}).value || '—';
   var total   = getTotal();
   var summary = getOrderSummary();
+  var now     = new Date();
+  var dateStr = now.toLocaleDateString('ru-RU') + ' ' + now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  var status  = paymentMethod === 'Перевод на карту' ? 'Ожидает перевода' : 'Ожидает обработки';
 
   var url = (window.landingConfig && window.landingConfig.formspreeUrl) || 'https://formspree.io/f/xeewabvz';
 
@@ -240,12 +245,15 @@ function _submitToFormspree(paymentMethod) {
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({
       _subject: 'Депозит ' + total.toLocaleString('ru-RU') + ' ₽ — ' + paymentMethod,
+      _cc: email,
+      'Дата и время': dateStr,
       Имя: name,
       Телефон: phone,
       Email: email,
       Состав: summary,
       Итого: total.toLocaleString('ru-RU') + ' ₽',
       'Способ оплаты': paymentMethod,
+      'Статус оплаты': status,
       Пожелание: msg
     })
   })

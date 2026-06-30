@@ -19,10 +19,17 @@ body { font-family: 'Jost', sans-serif; background: var(--cream); color: var(--t
 #petals-container { position: fixed; inset: 0; pointer-events: none; z-index: 99990; overflow: hidden; }
 .petal {
   position: absolute;
-  top: -60px;
-  border-radius: 50% 50% 35% 65% / 75% 75% 25% 25%;
-  background: rgba(255,255,255,0.90);
-  box-shadow: 0 2px 6px rgba(184,149,42,0.10), inset 0 0 10px rgba(255,255,255,0.6);
+  top: -90px;
+  background: radial-gradient(ellipse at 42% 38%, #ffffff 0%, #f5f3f0 45%, #e8e3de 100%);
+}
+.petal-near {
+  box-shadow:
+    inset -3px -5px 10px rgba(160,140,120,0.18),
+    inset  2px  2px  6px rgba(255,255,255,0.95),
+    0 4px 16px rgba(0,0,0,0.07);
+}
+.petal-far {
+  background: rgba(255,255,255,0.80);
 }
 
 /* ── Editor Overlay & Panel ──────────────────────────────────────────────── */
