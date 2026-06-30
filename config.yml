@@ -1,0 +1,80 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images"
+public_folder: "/images"
+
+locale: "ru"
+
+collections:
+  - name: "settings"
+    label: "Настройки лендинга"
+    files:
+
+      - name: "hero"
+        label: "🌸 Главный экран (Hero)"
+        file: "content/hero.json"
+        fields:
+          - { label: "Тег над заголовком (маленький)", name: "eyebrow", widget: "string", default: "Цветочный депозит" }
+          - { label: "Заголовок (строка 1)", name: "title_line1", widget: "string", default: "Цветы" }
+          - { label: "Заголовок (строка 2, курсив)", name: "title_line2", widget: "string", default: "любви" }
+          - { label: "Имена молодожёнов", name: "names", widget: "string", default: "Вера & Хавьер" }
+          - { label: "Текст под именами", name: "text", widget: "text", default: "Мы бы хотели, чтобы красота этого дня продолжалась в нашем доме ещё долгие месяцы. Вместо букета на свадьбу вы можете поддержать нас цветочной подпиской от Miracle Flowers." }
+          - { label: "Текст кнопки", name: "cta_text", widget: "string", default: "Внести депозит" }
+          - { label: "Фото молодожёнов", name: "photo", widget: "image", default: "/photo.jpg" }
+          - { label: "Логотип", name: "logo", widget: "image", default: "/logo.png" }
+
+      - name: "how_it_works"
+        label: "✦ Как это работает"
+        file: "content/how_it_works.json"
+        fields:
+          - { label: "Надпись над заголовком", name: "label", widget: "string", default: "Как это работает" }
+          - { label: "Заголовок секции", name: "heading", widget: "string", default: "Как работает депозит" }
+          - label: "Шаги"
+            name: "steps"
+            widget: "list"
+            fields:
+              - { label: "Номер", name: "number", widget: "string" }
+              - { label: "Заголовок шага", name: "title", widget: "string" }
+              - { label: "Описание", name: "text", widget: "text" }
+
+      - name: "certificates"
+        label: "🎫 Сертификаты (депозиты)"
+        file: "content/certificates.json"
+        fields:
+          - { label: "Надпись над заголовком", name: "label", widget: "string", default: "Сертификаты" }
+          - { label: "Заголовок секции", name: "heading", widget: "string", default: "Внесите сумму на депозит" }
+          - { label: "Изображение сертификата", name: "image", widget: "image", default: "/certificate.jpg" }
+          - label: "Карточки сертификатов"
+            name: "cards"
+            widget: "list"
+            fields:
+              - { label: "Сумма (только цифры, без ₽)", name: "amount", widget: "number" }
+              - { label: "Тег (например: Популярный)", name: "tag", widget: "string" }
+
+      - name: "callback"
+        label: "📞 Блок обратного звонка"
+        file: "content/callback.json"
+        fields:
+          - { label: "Надпись над заголовком", name: "label", widget: "string", default: "Остались вопросы?" }
+          - { label: "Заголовок", name: "heading", widget: "string", default: "Мы на связи" }
+          - { label: "Текст под заголовком", name: "subtext", widget: "text", default: "Оставьте Ваш номер телефона и наш менеджер свяжется с Вами в течение 15 минут." }
+          - { label: "Телефон (отображаемый)", name: "phone_display", widget: "string", default: "+7 (917) 672-28-77" }
+          - { label: "Телефон (ссылка tel:)", name: "phone_link", widget: "string", default: "+79176722877" }
+          - { label: "Текст сообщения об успехе", name: "success_text", widget: "string", default: "✦ Отлично! Мы свяжемся с Вами в течение 15 минут." }
+
+      - name: "footer"
+        label: "🌿 Футер (подвал)"
+        file: "content/footer.json"
+        fields:
+          - { label: "Сайт (URL)", name: "website_url", widget: "string", default: "https://miracleflowers.ru" }
+          - { label: "Сайт (текст)", name: "website_text", widget: "string", default: "miracleflowers.ru" }
+          - { label: "Instagram (URL)", name: "instagram_url", widget: "string", default: "https://instagram.com/miracleflowers" }
+          - { label: "Instagram (текст)", name: "instagram_text", widget: "string", default: "@miracleflowers" }
+          - { label: "Адрес", name: "address", widget: "string", default: "г. Чебоксары, Университетская ул., 38к2" }
+          - { label: "Юридическое название", name: "legal_name", widget: "string", default: "ИП Таммет Яан Эдуардович" }
+          - { label: "ИНН", name: "inn", widget: "string", default: "772983784892" }
+          - { label: "ОГРН", name: "ogrn", widget: "string", default: "321774600283674" }
+          - { label: "Копирайт", name: "copyright", widget: "string", default: "© Miracle Flowers. Цветочная подписка для молодожёнов." }
+          - { label: "Логотип в футере", name: "logo", widget: "image", default: "/logo.png" }

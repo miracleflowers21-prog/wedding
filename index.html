@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru" style="--leaf-green: #7a9a60; --gold: #B8952A; --cream: #F5F0E8;"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Цветочный депозит — Miracle Flowers</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;family=Jost:wght@300;400;500&amp;display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #F5F0E8; --cream-dark: #EDE5D4; --gold: #B8952A; --gold-light: #D4AF5A;
+  --green: #4A5C3A; --green-light: #6B7D5A; --leaf-green: #7a9a60;
+  --text-dark: #2A2218; --text-mid: #5C5040; --text-light: #8C7D6A;
+  --white: #FDFCF8; --r: 16px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Jost', sans-serif; background: var(--cream); color: var(--text-dark); overflow-x: hidden; }
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99998; display: none; }
+.panel-overlay.visible { display: block; }
+.panel { position: fixed; top: 0; right: -520px; width: 500px; height: 100vh; background: #1a1410; z-index: 99999; overflow-y: auto; transition: right .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+.panel.open { right: 0; }
+.panel-head { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.panel-head h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: var(--gold-light); }
+.panel-close { background: none; border: none; color: rgba(255,255,255,0.4); font-size: 24px; cursor: pointer; padding: 4px 8px; }
+.panel-close:hover { color: white; }
+.panel-body { padding: 24px; flex: 1; }
+.panel-section { margin-bottom: 28px; }
+.panel-section-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(184,149,42,0.2); }
+.panel-row { margin-bottom: 14px; }
+.panel-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 5px; letter-spacing: 0.05em; }
+.panel-input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 12px; color: white; font-family: 'Jost', sans-serif; font-size: 14px; outline: none; transition: border-color .2s; }
+.panel-input:focus { border-color: var(--gold); background: rgba(255,255,255,0.1); }
+.panel-textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+.panel-img-btn { width: 100%; background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 13px; text-align: center; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.panel-img-btn:hover { border-color: var(--gold); color: var(--gold-light); background: rgba(184,149,42,0.08); }
+.panel-img-preview { width: 100%; height: 70px; object-fit: cover; border-radius: 6px; margin-top: 8px; display: none; border: 1px solid rgba(184,149,42,0.3); }
+.panel-img-preview.visible { display: block; }
+.certs-grid-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cert-panel-item { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; }
+.cert-panel-label { color: var(--gold-light); font-size: 11px; margin-bottom: 8px; font-weight: 500; }
+.color-row { display: flex; gap: 10px; align-items: center; }
+.color-input { width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; padding: 2px; background: none; }
+.range-row { display: flex; align-items: center; gap: 10px; }
+.range-input { flex: 1; accent-color: var(--gold); }
+.range-val { color: var(--gold-light); font-size: 13px; min-width: 36px; text-align: right; }
+.panel-save { margin: 16px 24px 24px; padding: 16px; background: var(--leaf-green); color: white; border: none; border-radius: 10px; font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: background .2s; width: calc(100% - 48px); flex-shrink: 0; }
+.panel-save:hover { background: var(--gold); }
+.login-overlay { position: fixed; inset: 0; background: rgba(42,34,24,0.92); z-index: 999999; display: none; align-items: center; justify-content: center; }
+.login-overlay.visible { display: flex; }
+.login-box { background: var(--white); border-radius: 20px; padding: 48px 40px; width: 340px; text-align: center; }
+.login-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; margin-bottom: 6px; }
+.login-box p { font-size: 13px; color: var(--text-light); margin-bottom: 24px; }
+.login-input { width: 100%; font-family: 'Jost', sans-serif; font-size: 16px; color: var(--text-dark); background: var(--cream); border: 1px solid rgba(184,149,42,0.3); border-radius: 10px; padding: 14px 16px; outline: none; text-align: center; letter-spacing: 0.2em; margin-bottom: 12px; }
+.login-input:focus { border-color: var(--gold); }
+.login-btn { width: 100%; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: white; background: var(--leaf-green); border: none; border-radius: 10px; padding: 15px; cursor: pointer; }
+.login-btn:hover { background: var(--gold); }
+.login-err { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; }
+.edit-trigger { position: fixed; bottom: 24px; right: 24px; z-index: 9000; background: #1a1410; border: 1px solid rgba(184,149,42,0.4); color: var(--gold-light); padding: 12px 20px; border-radius: 50px; font-size: 13px; cursor: pointer; font-family: 'Jost', sans-serif; letter-spacing: 0.1em; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all .2s; display: none; }
+.edit-trigger.visible { display: flex; align-items: center; gap: 8px; }
+.edit-trigger:hover { background: var(--gold); color: white; border-color: var(--gold); }
+.hero { width: 100%; min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 32px; background: var(--cream); }
+.hero-photo { border-radius: var(--r); overflow: hidden; min-height: 580px; }
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; border-radius: var(--r); }
+.hero-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 60px 48px; background: var(--white); border-radius: var(--r); border: 0.5px solid rgba(184,149,42,0.2); }
+.brand-logo { width: 150px; margin-bottom: 40px; display: block; }
+.hero-eyebrow { font-weight: 300; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 64px; line-height: 1; color: var(--text-dark); margin-bottom: 8px; }
+.hero-title em { font-style: italic; color: var(--green); }
+.hero-names { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 28px; color: var(--gold); margin-bottom: 28px; }
+.hero-text { font-weight: 300; font-size: 15px; line-height: 1.8; color: var(--text-mid); max-width: 360px; margin-bottom: 44px; }
+.hero-cta { display: inline-block; font-weight: 400; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: white; background: var(--leaf-green); padding: 16px 36px; text-decoration: none; border: none; border-radius: 8px; cursor: pointer; transition: background .3s; }
+.hero-cta:hover { background: var(--gold); }
+.divider { display: flex; align-items: center; gap: 20px; padding: 0 80px; margin: 24px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 0.5px; background: var(--gold-light); opacity: 0.5; }
+.divider span { font-size: 18px; color: var(--gold-light); }
+.section { padding: 48px 80px; }
+.section-label { font-weight: 300; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; text-align: center; }
+.section-heading { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 46px; text-align: center; color: var(--text-dark); margin-bottom: 36px; line-height: 1.1; }
+.steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; max-width: 900px; margin: 0 auto; }
+.step { text-align: center; }
+.step-number { font-family: 'Cormorant Garamond', serif; font-size: 76px; font-weight: 300; color: var(--cream-dark); line-height: 1; margin-bottom: -18px; }
+.step-title { font-weight: 500; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+.step-text { font-weight: 300; font-size: 14px; line-height: 1.7; color: var(--text-mid); }
+.certs-section { background: var(--white); padding: 48px 80px; }
+.certs-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
+.cert-card { background: var(--cream); border-radius: var(--r); border: 0.5px solid rgba(184,149,42,0.3); padding: 0 0 24px; text-align: center; cursor: pointer; transition: all .3s; position: relative; overflow: hidden; }
+.cert-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); border-radius: var(--r) var(--r) 0 0; transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+.cert-card:hover::before, .cert-card.selected::before { transform: scaleX(1); }
+.cert-card:hover, .cert-card.selected { border-color: var(--gold); background: var(--white); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(184,149,42,0.12); }
+.cert-img-wrap { width: 100%; height: 120px; overflow: hidden; border-radius: var(--r) var(--r) 0 0; margin-bottom: 18px; }
+.cert-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cert-price { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 34px; color: var(--text-dark); margin-bottom: 4px; }
+.cert-sublabel { font-weight: 300; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-light); margin-bottom: 14px; }
+.cert-tag { display: inline-block; font-weight: 300; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green-light); border: 0.5px solid var(--green-light); padding: 4px 12px; border-radius: 4px; margin-bottom: 16px; }
+.qty-wrap { display: flex; align-items: center; justify-content: center; margin-top: 4px; }
+.qty-btn { width: 32px; height: 32px; background: var(--cream-dark); border: 0.5px solid rgba(184,149,42,0.4); color: var(--text-dark); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+.qty-btn:first-child { border-radius: 8px 0 0 8px; }
+.qty-btn:last-child { border-radius: 0 8px 8px 0; }
+.qty-btn:hover { background: var(--gold); color: white; }
+.qty-val { width: 40px; height: 32px; background: white; border-top: 0.5px solid rgba(184,149,42,0.4); border-bottom: 0.5px solid rgba(184,149,42,0.4); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 18px; }
+.form-wrap { padding: 48px 80px; max-width: 680px; margin: 0 auto; }
+.form-box { background: var(--white); border-radius: var(--r); border: 0.5px solid rgba(184,149,42,0.2); padding: 48px; }
+.form-group { margin-bottom: 24px; }
+.form-label { display: block; font-weight: 300; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; }
+.form-input { width: 100%; font-family: 'Jost', sans-serif; font-weight: 300; font-size: 15px; color: var(--text-dark); background: var(--cream); border: 0.5px solid rgba(184,149,42,0.25); border-radius: 10px; padding: 13px 16px; outline: none; transition: border-color .3s; }
+.form-input:focus { border-color: var(--gold); background: white; }
+.form-select { appearance: none; cursor: pointer; }
+.selected-summary { background: var(--cream); border: 0.5px solid rgba(184,149,42,0.4); border-radius: 10px; padding: 18px 22px; margin-bottom: 24px; display: none; justify-content: space-between; align-items: center; }
+.selected-summary-price { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--gold); }
+.form-submit { width: 100%; font-family: 'Jost', sans-serif; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: white; background: var(--leaf-green); border: none; border-radius: 10px; padding: 18px; cursor: pointer; transition: background .3s; margin-top: 8px; }
+.form-submit:hover { background: var(--gold); }
+.form-note { font-weight: 300; font-size: 12px; color: var(--text-light); text-align: center; margin-top: 14px; line-height: 1.7; }
+.success-msg { display: none; text-align: center; padding: 40px; background: var(--cream); border-radius: var(--r); border: 0.5px solid rgba(184,149,42,0.4); margin-top: 20px; }
+.success-msg.visible { display: block; }
+.success-msg h3 { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; color: var(--green); margin-bottom: 10px; }
+.callback-section { background: var(--leaf-green); padding: 56px 80px; text-align: center; }
+.callback-section .section-label { color: rgba(255,255,255,0.7); }
+.callback-section .section-heading { color: white; font-size: 38px; margin-bottom: 12px; }
+.callback-sub { font-weight: 300; font-size: 15px; color: rgba(255,255,255,0.8); margin-bottom: 36px; line-height: 1.7; }
+.callback-sub a { color: var(--gold-light); text-decoration: none; font-weight: 500; }
+.callback-form { display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 0 auto; }
+.callback-input { font-family: 'Jost', sans-serif; font-size: 15px; color: var(--text-dark); background: white; border: none; border-radius: 10px; padding: 15px 20px; outline: none; }
+.callback-btn { font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: white; background: var(--green); border: none; border-radius: 10px; padding: 15px 28px; cursor: pointer; transition: background .3s; }
+.callback-btn:hover { background: var(--gold); }
+.callback-success { display: none; color: rgba(255,255,255,0.9); font-size: 15px; margin-top: 16px; }
+.callback-success.visible { display: block; }
+.footer-inline { margin-top: 48px; padding-top: 32px; border-top: 0.5px solid rgba(255,255,255,0.2); }
+.footer-logo-inline { width: 140px; margin: 0 auto 12px; opacity: 0.55; display: block; }
+.footer-inline p { font-weight: 300; font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+.footer-inline a { color: var(--gold-light); text-decoration: none; }
+.footer-legal { font-size: 11px; color: rgba(255,255,255,0.35); }
+#page-loader { position: fixed; inset: 0; background: var(--cream); display: flex; align-items: center; justify-content: center; z-index: 99997; transition: opacity 0.4s; }
+#page-loader.hidden { opacity: 0; pointer-events: none; }
+.loader-flower { font-size: 48px; animation: spin 2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; padding: 16px; gap: 16px; }
+  .hero-photo { height: 65vw; min-height: auto; }
+  .hero-content { padding: 36px 24px; }
+  .hero-title { font-size: 44px; }
+  .section, .certs-section, .form-wrap, .callback-section { padding: 48px 20px; }
+  .steps-grid, .certs-grid { grid-template-columns: 1fr; gap: 20px; }
+  .divider { padding: 0 24px; }
+  .form-box { padding: 28px 20px; }
+  .panel { width: 100%; right: -100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Данные сайта — сюда сохраняются все изменения -->
+<script id="siteData" type="application/json">{
+  "names": "Вера &amp; Хавьер",
+  "title1": "Цветы",
+  "title2": "любви",
+  "text": "Мы бы хотели, чтобы красота этого дня продолжалась в нашем доме ещё долгие месяцы. Вместо букета на свадьбу вы можете поддержать нас цветочной подпиской от Miracle Flowers.",
+  "cta": "Внести депозит",
+  "phone": "+7 (917) 672-28-77",
+  "phoneLink": "+79176722877",
+  "address": "г. Чебоксары, Университетская ул., 38к2",
+  "website": "miracleflowers.ru",
+  "instagram": "@miracleflowers",
+  "heroPhoto": "assets/hero.jpg",
+  "heroLogo": "logo.png",
+  "footerLogo": "logo.png",
+  "colorGreen": "#7a9a60",
+  "colorGold": "#B8952A",
+  "colorBg": "#F5F0E8",
+  "titleSize": 64,
+  "namesSize": 28,
+  "textSize": 15,
+  "priceSize": 34,
+  "certs": [
+    {
+      "amount": "1000",
+      "tag": "Начало",
+      "img": "assets/cert-1.jpg"
+    },
+    {
+      "amount": "2000",
+      "tag": "Романтика",
+      "img": "assets/cert-2.jpg"
+    },
+    {
+      "amount": "3000",
+      "tag": "Нежность",
+      "img": "certificate.jpg"
+    },
+    {
+      "amount": "5000",
+      "tag": "Популярный",
+      "img": "certificate.jpg"
+    },
+    {
+      "amount": "7000",
+      "tag": "Щедрость",
+      "img": "certificate.jpg"
+    },
+    {
+      "amount": "10000",
+      "tag": "Роскошь",
+      "img": "certificate.jpg"
+    }
+  ]
+}</script>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h3>🌸 Miracle Flowers</h3>
+    <p>Введите пароль для редактирования</p>
+    <input class="login-input" type="password" id="loginInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Войти в редактор</button>
+    <div class="login-err" id="loginErr" style="display: block;">Неверный пароль</div>
+  </div>
+</div>
+
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+
+<!-- EDIT PANEL -->
+<div class="panel" id="editPanel">
+  <div class="panel-head">
+    <h2>✦ Редактор сайта</h2>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body">
+    <div class="panel-section">
+      <div class="panel-section-title">🌸 Главный экран</div>
+      <div class="panel-row"><div class="panel-label">Имена молодожёнов</div><input class="panel-input" id="p_names" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Заголовок строка 1</div><input class="panel-input" id="p_title1" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Заголовок строка 2 (курсив)</div><input class="panel-input" id="p_title2" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Текст описания</div><textarea class="panel-input panel-textarea" id="p_text" oninput="applyLive()"></textarea></div>
+      <div class="panel-row"><div class="panel-label">Текст кнопки</div><input class="panel-input" id="p_cta" oninput="applyLive()"></div>
+      <div class="panel-row">
+        <div class="panel-label">Фото молодожёнов</div>
+        <div class="panel-img-btn" onclick="pickImg('heroPhoto')">📷 Загрузить фото</div>
+        <img id="prev_heroPhoto" class="panel-img-preview visible" src="assets/hero.jpg">
+      </div>
+      <div class="panel-row">
+        <div class="panel-label">Логотип</div>
+        <div class="panel-img-btn" onclick="pickImg('heroLogo')">📷 Загрузить логотип</div>
+        <img id="prev_heroLogo" class="panel-img-preview">
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">🎫 Сертификаты (фото, сумма, тег)</div>
+      <div class="certs-grid-panel" id="certsPanel"><div class="cert-panel-item"><div class="cert-panel-label">Сертификат 1</div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div><input class="panel-input" value="1000" data-i="0" data-f="amount" oninput="onCertField(this)"></div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div><input class="panel-input" value="Начало" data-i="0" data-f="tag" oninput="onCertField(this)"></div><div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg(0)">📷 Фото</div><img id="certPrev0" class="panel-img-preview" src="assets/cert-1.jpg" style="display: block;"></div><div class="cert-panel-item"><div class="cert-panel-label">Сертификат 2</div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div><input class="panel-input" value="2000" data-i="1" data-f="amount" oninput="onCertField(this)"></div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div><input class="panel-input" value="Романтика" data-i="1" data-f="tag" oninput="onCertField(this)"></div><div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg(1)">📷 Фото</div><img id="certPrev1" class="panel-img-preview" src="assets/cert-2.jpg" style="display: block;"></div><div class="cert-panel-item"><div class="cert-panel-label">Сертификат 3</div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div><input class="panel-input" value="3000" data-i="2" data-f="amount" oninput="onCertField(this)"></div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div><input class="panel-input" value="Нежность" data-i="2" data-f="tag" oninput="onCertField(this)"></div><div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg(2)">📷 Фото</div><img id="certPrev2" class="panel-img-preview"></div><div class="cert-panel-item"><div class="cert-panel-label">Сертификат 4</div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div><input class="panel-input" value="5000" data-i="3" data-f="amount" oninput="onCertField(this)"></div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div><input class="panel-input" value="Популярный" data-i="3" data-f="tag" oninput="onCertField(this)"></div><div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg(3)">📷 Фото</div><img id="certPrev3" class="panel-img-preview"></div><div class="cert-panel-item"><div class="cert-panel-label">Сертификат 5</div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div><input class="panel-input" value="7000" data-i="4" data-f="amount" oninput="onCertField(this)"></div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div><input class="panel-input" value="Щедрость" data-i="4" data-f="tag" oninput="onCertField(this)"></div><div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg(4)">📷 Фото</div><img id="certPrev4" class="panel-img-preview"></div><div class="cert-panel-item"><div class="cert-panel-label">Сертификат 6</div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div><input class="panel-input" value="10000" data-i="5" data-f="amount" oninput="onCertField(this)"></div><div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div><input class="panel-input" value="Роскошь" data-i="5" data-f="tag" oninput="onCertField(this)"></div><div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg(5)">📷 Фото</div><img id="certPrev5" class="panel-img-preview"></div></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">📞 Контакты</div>
+      <div class="panel-row"><div class="panel-label">Номер телефона</div><input class="panel-input" id="p_phone" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Телефон для ссылки (цифры)</div><input class="panel-input" id="p_phoneLink" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Адрес</div><input class="panel-input" id="p_address" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Сайт</div><input class="panel-input" id="p_website" oninput="applyLive()"></div>
+      <div class="panel-row"><div class="panel-label">Instagram</div><input class="panel-input" id="p_instagram" oninput="applyLive()"></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">🎨 Цвета</div>
+      <div class="panel-row"><div class="panel-label">Цвет кнопок</div><div class="color-row"><input type="color" class="color-input" id="p_colorGreen" oninput="applyLive()"><span style="color:rgba(255,255,255,0.5);font-size:13px;">Зелёный</span></div></div>
+      <div class="panel-row"><div class="panel-label">Золотой цвет</div><div class="color-row"><input type="color" class="color-input" id="p_colorGold" oninput="applyLive()"><span style="color:rgba(255,255,255,0.5);font-size:13px;">Золото</span></div></div>
+      <div class="panel-row"><div class="panel-label">Цвет фона</div><div class="color-row"><input type="color" class="color-input" id="p_colorBg" oninput="applyLive()"><span style="color:rgba(255,255,255,0.5);font-size:13px;">Фон</span></div></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">✦ Размеры текста</div>
+      <div class="panel-row"><div class="panel-label">Заголовок</div><div class="range-row"><input type="range" class="range-input" id="p_titleSize" min="32" max="96" oninput="applyLive();document.getElementById('v_titleSize').textContent=this.value+'px'"><span class="range-val" id="v_titleSize">64px</span></div></div>
+      <div class="panel-row"><div class="panel-label">Имена</div><div class="range-row"><input type="range" class="range-input" id="p_namesSize" min="16" max="56" oninput="applyLive();document.getElementById('v_namesSize').textContent=this.value+'px'"><span class="range-val" id="v_namesSize">28px</span></div></div>
+      <div class="panel-row"><div class="panel-label">Основной текст</div><div class="range-row"><input type="range" class="range-input" id="p_textSize" min="12" max="24" oninput="applyLive();document.getElementById('v_textSize').textContent=this.value+'px'"><span class="range-val" id="v_textSize">15px</span></div></div>
+      <div class="panel-row"><div class="panel-label">Цены сертификатов</div><div class="range-row"><input type="range" class="range-input" id="p_priceSize" min="20" max="60" oninput="applyLive();document.getElementById('v_priceSize').textContent=this.value+'px'"><span class="range-val" id="v_priceSize">34px</span></div></div>
+    </div>
+  </div>
+  <button class="panel-save" onclick="doSave()">💾 Сохранить и скачать файл</button>
+</div>
+
+<div class="edit-trigger" id="editTrigger" onclick="openPanel()">✏️ Редактировать сайт</div>
+
+
+<!-- ЛЕНДИНГ -->
+<section class="hero">
+  <div class="hero-photo"><img id="heroPhoto" src="assets/hero.jpg" alt="Молодожёны"></div>
+  <div class="hero-content">
+    <img id="heroLogo" src="logo.png" alt="Miracle Flowers" class="brand-logo">
+    <p class="hero-eyebrow">Цветочный депозит</p>
+    <h1 class="hero-title" id="heroTitle" style="font-size: 64px;"><span id="heroTitle1">Цветы</span><br>для <em id="heroTitle2">любви</em></h1>
+    <p class="hero-names" id="heroNames" style="font-size: 28px;">Вера &amp; Хавьер</p>
+    <p class="hero-text" id="heroText" style="font-size: 15px;">Мы бы хотели, чтобы красота этого дня продолжалась в нашем доме ещё долгие месяцы. Вместо букета на свадьбу вы можете поддержать нас цветочной подпиской от Miracle Flowers.</p>
+    <a href="#certificates" class="hero-cta" id="heroCta">Внести депозит</a>
+  </div>
+</section>
+<div class="divider"><span>✦</span></div>
+<section class="section">
+  <p class="section-label">Как это работает</p>
+  <h2 class="section-heading">Как работает депозит</h2>
+  <div class="steps-grid">
+    <div class="step"><div class="step-number">01</div><p class="step-title">Внесите вклад</p><p class="step-text">Выберите сумму от 1 000 — это ваш взнос на личный цветочный счёт молодожёнов.</p></div>
+    <div class="step"><div class="step-number">02</div><p class="step-title">Депозит пополняется</p><p class="step-text">Все взносы гостей суммируются — чем больше вклад, тем дольше длится подписка.</p></div>
+    <div class="step"><div class="step-number">03</div><p class="step-title">Цветы после свадьбы</p><p class="step-text">Молодожёны начнут получать еженедельные боксы свежих цветов прямо домой.</p></div>
+  </div>
+</section>
+<div class="divider"><span>✦</span></div>
+<section class="certs-section" id="certificates">
+  <p class="section-label">Сертификаты</p>
+  <h2 class="section-heading">Внесите сумму на депозит</h2>
+  <div class="certs-grid" id="certsGrid"><div class="cert-card" data-amount="1000"><div class="cert-img-wrap"><img class="cert-img" id="certImg0" src="assets/cert-1.jpg" alt=""></div><div class="cert-price" id="certPrice0" style="font-size:34px">1&nbsp;000 ₽</div><div class="cert-sublabel">Сертификат</div><div><span class="cert-tag" id="certTag0">Начало</span></div><div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div></div><div class="cert-card" data-amount="2000"><div class="cert-img-wrap"><img class="cert-img" id="certImg1" src="assets/cert-2.jpg" alt=""></div><div class="cert-price" id="certPrice1" style="font-size:34px">2&nbsp;000 ₽</div><div class="cert-sublabel">Сертификат</div><div><span class="cert-tag" id="certTag1">Романтика</span></div><div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div></div><div class="cert-card" data-amount="3000"><div class="cert-img-wrap"><img class="cert-img" id="certImg2" src="certificate.jpg" alt=""></div><div class="cert-price" id="certPrice2" style="font-size:34px">3&nbsp;000 ₽</div><div class="cert-sublabel">Сертификат</div><div><span class="cert-tag" id="certTag2">Нежность</span></div><div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div></div><div class="cert-card" data-amount="5000"><div class="cert-img-wrap"><img class="cert-img" id="certImg3" src="certificate.jpg" alt=""></div><div class="cert-price" id="certPrice3" style="font-size:34px">5&nbsp;000 ₽</div><div class="cert-sublabel">Сертификат</div><div><span class="cert-tag" id="certTag3">Популярный</span></div><div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div></div><div class="cert-card" data-amount="7000"><div class="cert-img-wrap"><img class="cert-img" id="certImg4" src="certificate.jpg" alt=""></div><div class="cert-price" id="certPrice4" style="font-size:34px">7&nbsp;000 ₽</div><div class="cert-sublabel">Сертификат</div><div><span class="cert-tag" id="certTag4">Щедрость</span></div><div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div></div><div class="cert-card" data-amount="10000"><div class="cert-img-wrap"><img class="cert-img" id="certImg5" src="certificate.jpg" alt=""></div><div class="cert-price" id="certPrice5" style="font-size:34px">10&nbsp;000 ₽</div><div class="cert-sublabel">Сертификат</div><div><span class="cert-tag" id="certTag5">Роскошь</span></div><div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div></div></div>
+</section>
+<div class="divider"><span>✦</span></div>
+<section id="order-form">
+  <div class="form-wrap">
+    <p class="section-label" style="text-align:center">Оформление</p>
+    <h2 class="section-heading">Ваши данные</h2>
+    <div class="form-box">
+      <div class="selected-summary" id="selDisplay"><span id="selLabel">Сертификат</span><span class="selected-summary-price" id="selPrice">—</span></div>
+      <div class="form-group"><label class="form-label">Ваше имя</label><input class="form-input" type="text" id="gName" placeholder="Имя и фамилия"></div>
+      <div class="form-group"><label class="form-label">Телефон</label><input class="form-input" type="tel" id="gPhone" placeholder="+7 (___) ___-__-__"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="gEmail" placeholder="your@email.ru"></div>
+      <div class="form-group"><label class="form-label">Сумма депозита</label><select class="form-input form-select" id="certAmt" onchange="syncSel(this)"><option value="">— выберите сертификат —</option><option value="1000">1&nbsp;000 ₽</option><option value="2000">2&nbsp;000 ₽</option><option value="3000">3&nbsp;000 ₽</option><option value="5000">5&nbsp;000 ₽</option><option value="7000">7&nbsp;000 ₽</option><option value="10000">10&nbsp;000 ₽</option></select></div>
+      <div class="form-group"><label class="form-label">Пожелание</label><textarea class="form-input" id="gMsg" rows="4" placeholder="Ваши слова…" style="resize:vertical;"></textarea></div>
+      <button class="form-submit" id="subBtn" onclick="submitForm()">Внести депозит</button>
+      <p class="form-note">После отправки с вами свяжется менеджер Miracle Flowers для подтверждения и оплаты</p>
+      <div class="success-msg" id="okMsg"><h3>Спасибо! ✦</h3><p>Ваш вклад оформлен. Мы свяжемся с вами в ближайшее время.</p></div>
+    </div>
+  </div>
+</section>
+<section class="callback-section">
+  <p class="section-label">Остались вопросы?</p>
+  <h2 class="section-heading">Мы на связи</h2>
+  <p class="callback-sub">Оставьте номер — перезвоним в течение 15 минут.<br>Или звоните: <a id="phoneLink" href="tel:+79176722877">+7 (917) 672-28-77</a></p>
+  <div class="callback-form">
+    <input class="callback-input" type="text" id="cbName" placeholder="Ваше имя">
+    <input class="callback-input" type="tel" id="cbPhone" placeholder="+7 (___) ___-__-__">
+    <button class="callback-btn" onclick="submitCb()">Перезвоните мне</button>
+  </div>
+  <p class="callback-success" id="cbOk">✦ Отлично! Мы свяжемся с Вами в течение 15 минут.</p>
+  <div class="footer-inline">
+    <img id="footerLogo" src="logo.png" class="footer-logo-inline" alt="Miracle Flowers">
+    <p><a id="footerWeb" href="https://miracleflowers.ru" target="_blank">miracleflowers.ru</a> · <a id="footerIg" href="https://instagram.com/miracleflowers" target="_blank">@miracleflowers</a></p>
+    <p id="footerAddr">г. Чебоксары, Университетская ул., 38к2</p>
+    <p class="footer-legal">ИП Таммет Яан Эдуардович · ИНН 772983784892 · ОГРН 321774600283674</p>
+    <p>© Miracle Flowers. Цветочная подписка для молодожёнов.</p>
+  </div>
+</section>
+
+<input type="file" id="imgFilePicker" accept="image/*" style="display:none" onchange="onImgPicked(event)">
+
+<script>
+var PASS = 'miracle2024';
+var FORMSPREE = 'https://formspree.io/f/xeewabvz';
+var selAmt = null, selQty = 1, imgTarget = null;
+
+// Load site data from JSON tag
+var D = JSON.parse(document.getElementById('siteData').textContent);
+
+function saveD() {
+  document.getElementById('siteData').textContent = JSON.stringify(D, null, 2);
+}
+
+window.addEventListener('load', function(){
+  applyDataToPage();
+  fillPanel();
+  buildCerts();
+  buildCertsPanel();
+  var l = document.getElementById('page-loader');
+  l.classList.add('hidden');
+  setTimeout(function(){ if(l.parentNode) l.parentNode.removeChild(l); }, 500);
+  if (location.search.indexOf('edit') !== -1) openLogin();
+});
+
+document.addEventListener('keydown', function(e){
+  if (e.ctrlKey && e.shiftKey && (e.key==='E'||e.key==='е'||e.key==='У')) {
+    e.preventDefault(); openLogin();
+  }
+});
+
+function openLogin(){
+  document.getElementById('loginOverlay').classList.add('visible');
+  setTimeout(function(){ document.getElementById('loginInput').focus(); }, 100);
+}
+function doLogin(){
+  if (document.getElementById('loginInput').value === PASS) {
+    document.getElementById('loginOverlay').classList.remove('visible');
+    document.getElementById('loginInput').value = '';
+    document.getElementById('editTrigger').classList.add('visible');
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginInput').value = '';
+  }
+}
+function openPanel(){ document.getElementById('editPanel').classList.add('open'); document.getElementById('panelOverlay').classList.add('visible'); }
+function closePanel(){ document.getElementById('editPanel').classList.remove('open'); document.getElementById('panelOverlay').classList.remove('visible'); }
+
+// Apply all data to page elements
+function applyDataToPage(){
+  document.getElementById('heroTitle1').textContent = D.title1;
+  document.getElementById('heroTitle2').textContent = D.title2;
+  document.getElementById('heroNames').textContent = D.names.replace('&amp;','&');
+  document.getElementById('heroText').textContent = D.text;
+  document.getElementById('heroCta').textContent = D.cta;
+  document.getElementById('heroPhoto').src = D.heroPhoto;
+  document.getElementById('heroLogo').src = D.heroLogo;
+  document.getElementById('footerLogo').src = D.footerLogo;
+  var pl = document.getElementById('phoneLink');
+  pl.textContent = D.phone; pl.href = 'tel:' + D.phoneLink;
+  document.getElementById('footerAddr').textContent = D.address;
+  var fw = document.getElementById('footerWeb'); fw.textContent = D.website; fw.href = 'https://' + D.website;
+  var fi = document.getElementById('footerIg'); fi.textContent = D.instagram; fi.href = 'https://instagram.com/' + D.instagram.replace('@','');
+  document.documentElement.style.setProperty('--leaf-green', D.colorGreen);
+  document.documentElement.style.setProperty('--gold', D.colorGold);
+  document.documentElement.style.setProperty('--cream', D.colorBg);
+  document.getElementById('heroTitle').style.fontSize = D.titleSize + 'px';
+  document.getElementById('heroNames').style.fontSize = D.namesSize + 'px';
+  document.getElementById('heroText').style.fontSize = D.textSize + 'px';
+  document.querySelectorAll('.cert-price').forEach(function(el){ el.style.fontSize = D.priceSize + 'px'; });
+}
+
+// Fill panel inputs from D
+function fillPanel(){
+  document.getElementById('p_names').value = D.names.replace('&amp;','&');
+  document.getElementById('p_title1').value = D.title1;
+  document.getElementById('p_title2').value = D.title2;
+  document.getElementById('p_text').value = D.text;
+  document.getElementById('p_cta').value = D.cta;
+  document.getElementById('p_phone').value = D.phone;
+  document.getElementById('p_phoneLink').value = D.phoneLink;
+  document.getElementById('p_address').value = D.address;
+  document.getElementById('p_website').value = D.website;
+  document.getElementById('p_instagram').value = D.instagram;
+  document.getElementById('p_colorGreen').value = D.colorGreen;
+  document.getElementById('p_colorGold').value = D.colorGold;
+  document.getElementById('p_colorBg').value = D.colorBg;
+  document.getElementById('p_titleSize').value = D.titleSize;
+  document.getElementById('p_namesSize').value = D.namesSize;
+  document.getElementById('p_textSize').value = D.textSize;
+  document.getElementById('p_priceSize').value = D.priceSize;
+  document.getElementById('v_titleSize').textContent = D.titleSize + 'px';
+  document.getElementById('v_namesSize').textContent = D.namesSize + 'px';
+  document.getElementById('v_textSize').textContent = D.textSize + 'px';
+  document.getElementById('v_priceSize').textContent = D.priceSize + 'px';
+  // Show existing photos in panel previews
+  if (D.heroPhoto !== 'photo.jpg') showPreview('prev_heroPhoto', D.heroPhoto);
+  if (D.heroLogo !== 'logo.png') showPreview('prev_heroLogo', D.heroLogo);
+}
+
+// Apply live from panel to D and page
+function applyLive(){
+  D.names = document.getElementById('p_names').value;
+  D.title1 = document.getElementById('p_title1').value;
+  D.title2 = document.getElementById('p_title2').value;
+  D.text = document.getElementById('p_text').value;
+  D.cta = document.getElementById('p_cta').value;
+  D.phone = document.getElementById('p_phone').value;
+  D.phoneLink = document.getElementById('p_phoneLink').value;
+  D.address = document.getElementById('p_address').value;
+  D.website = document.getElementById('p_website').value;
+  D.instagram = document.getElementById('p_instagram').value;
+  D.colorGreen = document.getElementById('p_colorGreen').value;
+  D.colorGold = document.getElementById('p_colorGold').value;
+  D.colorBg = document.getElementById('p_colorBg').value;
+  D.titleSize = parseInt(document.getElementById('p_titleSize').value);
+  D.namesSize = parseInt(document.getElementById('p_namesSize').value);
+  D.textSize = parseInt(document.getElementById('p_textSize').value);
+  D.priceSize = parseInt(document.getElementById('p_priceSize').value);
+  applyDataToPage();
+}
+
+// Build cert cards
+function buildCerts(){
+  var grid = document.getElementById('certsGrid');
+  var sel = document.getElementById('certAmt');
+  grid.innerHTML = '';
+  sel.innerHTML = '<option value="">— выберите сертификат —</option>';
+  D.certs.forEach(function(c, i){
+    var fmt = parseInt(c.amount).toLocaleString('ru-RU');
+    var div = document.createElement('div');
+    div.className = 'cert-card';
+    div.dataset.amount = c.amount;
+    div.onclick = function(){ selectCert(this); };
+    div.innerHTML = '<div class="cert-img-wrap"><img class="cert-img" id="certImg'+i+'" src="'+c.img+'" alt=""/></div>' +
+      '<div class="cert-price" id="certPrice'+i+'" style="font-size:'+D.priceSize+'px">'+fmt+' ₽</div>' +
+      '<div class="cert-sublabel">Сертификат</div>' +
+      '<div><span class="cert-tag" id="certTag'+i+'">'+c.tag+'</span></div>' +
+      '<div class="qty-wrap" onclick="event.stopPropagation()"><button class="qty-btn" onclick="chQty(this,-1)">−</button><div class="qty-val">1</div><button class="qty-btn" onclick="chQty(this,1)">+</button></div>';
+    grid.appendChild(div);
+    sel.innerHTML += '<option value="'+c.amount+'">'+fmt+' ₽</option>';
+  });
+}
+
+// Build cert panel items
+function buildCertsPanel(){
+  var panel = document.getElementById('certsPanel');
+  panel.innerHTML = '';
+  D.certs.forEach(function(c, i){
+    var div = document.createElement('div');
+    div.className = 'cert-panel-item';
+    div.innerHTML = '<div class="cert-panel-label">Сертификат '+(i+1)+'</div>' +
+      '<div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Сумма ₽</div>' +
+      '<input class="panel-input" value="'+c.amount+'" data-i="'+i+'" data-f="amount" oninput="onCertField(this)"/></div>' +
+      '<div style="margin-bottom:6px"><div class="panel-label" style="font-size:11px">Тег</div>' +
+      '<input class="panel-input" value="'+c.tag+'" data-i="'+i+'" data-f="tag" oninput="onCertField(this)"/></div>' +
+      '<div class="panel-img-btn" style="font-size:11px;padding:8px;" onclick="pickCertImg('+i+')">📷 Фото</div>' +
+      '<img id="certPrev'+i+'" class="panel-img-preview" '+(c.img !== 'certificate.jpg' ? 'src="'+c.img+'" style="display:block"' : '')+'/>';
+    panel.appendChild(div);
+  });
+}
+
+function onCertField(el){
+  var i = parseInt(el.dataset.i), f = el.dataset.f;
+  D.certs[i][f] = el.value;
+  if (f === 'amount') {
+    var fmt = parseInt(el.value).toLocaleString('ru-RU');
+    var pr = document.getElementById('certPrice'+i);
+    if (pr) pr.textContent = fmt + ' ₽';
+    var cards = document.querySelectorAll('.cert-card');
+    if (cards[i]) cards[i].dataset.amount = el.value;
+    // rebuild select
+    var sel = document.getElementById('certAmt');
+    sel.innerHTML = '<option value="">— выберите сертификат —</option>';
+    D.certs.forEach(function(c){ sel.innerHTML += '<option value="'+c.amount+'">'+parseInt(c.amount).toLocaleString('ru-RU')+' ₽</option>'; });
+  }
+  if (f === 'tag') {
+    var tg = document.getElementById('certTag'+i);
+    if (tg) tg.textContent = el.value;
+  }
+}
+
+function pickCertImg(i){
+  imgTarget = 'cert_' + i;
+  document.getElementById('imgFilePicker').click();
+}
+
+function pickImg(target){
+  imgTarget = target;
+  document.getElementById('imgFilePicker').click();
+}
+
+function showPreview(prevId, src){
+  var p = document.getElementById(prevId);
+  if (p) { p.src = src; p.classList.add('visible'); }
+}
+
+function onImgPicked(e){
+  var file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  var tmpImg = new Image();
+  var objUrl = URL.createObjectURL(file);
+  tmpImg.onload = function(){
+    // Ресайз до 1280px, конвертация в WebP
+    var MAX = 1280;
+    var w = tmpImg.naturalWidth, h = tmpImg.naturalHeight;
+    if (w > MAX || h > MAX) {
+      if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+    }
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    cv.getContext('2d').drawImage(tmpImg, 0, 0, w, h);
+    URL.revokeObjectURL(objUrl);
+    // Имя файла по цели
+    var fname;
+    if (imgTarget && imgTarget.indexOf('cert_') === 0) {
+      fname = 'cert-' + (parseInt(imgTarget.replace('cert_','')) + 1) + '.webp';
+    } else if (imgTarget === 'heroLogo') {
+      fname = 'logo.webp';
+    } else {
+      fname = (imgTarget || 'image') + '.webp';
+    }
+    var assetPath = 'assets/' + fname;
+    cv.toBlob(function(blob){
+      // Скачать новый файл изображения
+      var dlUrl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = dlUrl; a.download = fname;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      // Обновить D и страницу (blob URL — только для текущей сессии)
+      if (imgTarget && imgTarget.indexOf('cert_') === 0) {
+        var i = parseInt(imgTarget.replace('cert_',''));
+        D.certs[i].img = assetPath;
+        var ci = document.getElementById('certImg'+i);
+        if (ci) ci.src = dlUrl;
+        var cp = document.getElementById('certPrev'+i);
+        if (cp) { cp.src = dlUrl; cp.style.display = 'block'; }
+      } else {
+        D[imgTarget] = assetPath;
+        var el = document.getElementById(imgTarget);
+        if (el) el.src = dlUrl;
+        if (imgTarget === 'heroLogo') {
+          D.footerLogo = assetPath;
+          document.getElementById('footerLogo').src = dlUrl;
+        }
+        showPreview('prev_'+imgTarget, dlUrl);
+      }
+      saveD();
+      _showImgNote(fname);
+    }, 'image/webp', 0.87);
+  };
+  tmpImg.src = objUrl;
+}
+function _showImgNote(fname){
+  var n = document.getElementById('_imgNote');
+  if (!n) {
+    n = document.createElement('div');
+    n.id = '_imgNote';
+    n.style.cssText = 'position:fixed;bottom:80px;right:24px;background:#1a1410;border:1px solid rgba(184,149,42,0.5);color:#D4AF5A;padding:14px 18px;border-radius:12px;font-family:Jost,sans-serif;font-size:13px;z-index:999999;max-width:300px;line-height:1.6;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+    document.body.appendChild(n);
+  }
+  n.innerHTML = '\u2B07\uFE0F <strong style="color:#fff">'+fname+'</strong> скачан.<br>Поместите в папку <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;">assets/</code> рядом с index.html<br><span style="opacity:0.55;font-size:11px">Затем нажмите «Сохранить»</span>';
+  n.style.display = 'block';
+  clearTimeout(n._t);
+  n._t = setTimeout(function(){ n.style.display = 'none'; }, 9000);
+}
+
+function doSave_OLD(){} // replaced
+
+// Form
+function selectCert(el){
+  document.querySelectorAll('.cert-card').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+  selAmt = el.dataset.amount; selQty = parseInt(el.querySelector('.qty-val').textContent)||1;
+  document.getElementById('certAmt').value = selAmt;
+  updateSum();
+  document.getElementById('order-form').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function chQty(btn,d){ var w=btn.parentElement,v=w.querySelector('.qty-val'),n=Math.max(1,(parseInt(v.textContent)||1)+d); v.textContent=n; var c=w.closest('.cert-card'); if(c&&c.classList.contains('selected')){selQty=n;updateSum();} }
+function updateSum(){ if(!selAmt)return; var t=parseInt(selAmt)*selQty; document.getElementById('selLabel').textContent=selQty>1?selQty+' × '+parseInt(selAmt).toLocaleString('ru-RU')+' ₽':'Сертификат'; document.getElementById('selPrice').textContent=t.toLocaleString('ru-RU')+' ₽'; document.getElementById('selDisplay').style.display='flex'; }
+function syncSel(s){ selAmt=s.value||null; if(selAmt){ document.querySelectorAll('.cert-card').forEach(function(c){ var m=c.dataset.amount===selAmt; c.classList.toggle('selected',m); if(m)selQty=parseInt(c.querySelector('.qty-val').textContent)||1; }); updateSum(); } }
+function submitForm(){ var name=document.getElementById('gName').value.trim(),phone=document.getElementById('gPhone').value.trim(),amt=document.getElementById('certAmt').value; if(!name||!phone||!amt){alert('Заполните имя, телефон и выберите сертификат.');return;} var total=parseInt(amt)*selQty,btn=document.getElementById('subBtn'); btn.textContent='Отправляем…';btn.disabled=true; fetch(FORMSPREE,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:'Депозит '+total.toLocaleString('ru-RU')+' ₽',Имя:name,Телефон:phone,Email:document.getElementById('gEmail').value||'—',Итого:total.toLocaleString('ru-RU')+' ₽',Пожелание:document.getElementById('gMsg').value||'—'})}).then(function(r){return r.json();}).then(function(d){if(d.ok){document.getElementById('okMsg').classList.add('visible');btn.style.display='none';}else{btn.textContent='Внести депозит';btn.disabled=false;}}).catch(function(){btn.textContent='Внести депозит';btn.disabled=false;}); }
+function submitCb(){ var phone=document.getElementById('cbPhone').value.trim(); if(!phone){alert('Введите номер телефона');return;} var btn=document.querySelector('.callback-btn'); btn.textContent='Отправляем…';btn.disabled=true; fetch(FORMSPREE,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({_subject:'Обратный звонок',Имя:document.getElementById('cbName').value||'—',Телефон:phone})}).then(function(r){return r.json();}).then(function(d){if(d.ok){document.getElementById('cbOk').classList.add('visible');btn.style.display='none';}else{btn.textContent='Перезвоните мне';btn.disabled=false;}}).catch(function(){btn.textContent='Перезвоните мне';btn.disabled=false;}); }
+</script>
+
+<script>
+function doSave(){
+  saveD();
+  // Восстанавливаем пути из D (blob URL сессионные — в сохранённый HTML не должны попасть)
+  var _hp = document.getElementById('heroPhoto');
+  if (_hp) _hp.src = D.heroPhoto;
+  var _hl = document.getElementById('heroLogo');
+  if (_hl) _hl.src = D.heroLogo;
+  var _fl = document.getElementById('footerLogo');
+  if (_fl) _fl.src = D.footerLogo;
+  D.certs.forEach(function(c, i){
+    var ci = document.getElementById('certImg'+i);
+    if (ci) ci.src = c.img;
+    var cp = document.getElementById('certPrev'+i);
+    if (cp && cp.style.display !== 'none') cp.src = c.img;
+  });
+  var _ph = document.getElementById('prev_heroPhoto');
+  if (_ph && _ph.classList.contains('visible')) _ph.src = D.heroPhoto;
+  var _pl = document.getElementById('prev_heroLogo');
+  if (_pl && _pl.classList.contains('visible')) _pl.src = D.heroLogo;
+  // Закрываем панель и скрываем все UI редактора перед сохранением
+  var panel = document.getElementById('editPanel');
+  var overlay = document.getElementById('panelOverlay');
+  var trigger = document.getElementById('editTrigger');
+  var login = document.getElementById('loginOverlay');
+  panel.classList.remove('open');
+  overlay.classList.remove('visible');
+  trigger.classList.remove('visible');
+  login.classList.remove('visible');
+
+  setTimeout(function(){
+    var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    html = html.replace(/class="panel open"/g, 'class="panel"');
+    html = html.replace(/class="panel-overlay visible"/g, 'class="panel-overlay"');
+    html = html.replace(/class="edit-trigger visible"/g, 'class="edit-trigger"');
+    html = html.replace(/class="login-overlay visible"/g, 'class="login-overlay"');
+
+    var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'index.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    trigger.classList.add('visible');
+    setTimeout(function(){
+      alert('\u2705 Файл index.html скачан!\n\nЕсли меняли изображения — не забудь также загрузить папку assets/ рядом с index.html.\n\nСайт обновится через 1-2 минуты.');
+    }, 200);
+  }, 400);
+}
+</script>
+
+
+</body></html>
