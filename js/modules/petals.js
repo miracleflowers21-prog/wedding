@@ -1,18 +1,9 @@
 (function () {
   if (!window.landingConfig || !window.landingConfig.effects || !window.landingConfig.effects.petals) return;
 
-  var SPAWN_DURATION = 2400;
-  var TOTAL_DURATION = 5000;
-  var SPAWN_INTERVAL = 60;
-
-  // Rose petal border-radius shapes — wide, rounded, organic
-  var SHAPES = [
-    '42% 58% 52% 48% / 62% 54% 46% 38%',
-    '55% 45% 38% 62% / 50% 60% 40% 50%',
-    '48% 52% 60% 40% / 44% 56% 44% 56%',
-    '38% 62% 48% 52% / 58% 42% 58% 42%',
-    '50% 50% 44% 56% / 60% 40% 60% 40%'
-  ];
+  var SPAWN_DURATION = 2200;
+  var TOTAL_DURATION = 4500;
+  var SPAWN_INTERVAL = 70;
 
   var container = document.createElement('div');
   container.id = 'petals-container';
@@ -23,59 +14,32 @@
   var startTime = Date.now();
   var lastSpawn = 0;
 
-  function rand(a, b) { return a + Math.random() * (b - a); }
-  function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
 
   function spawnPetal() {
-    var isNear = Math.random() < 0.38;
-    var w, h, opacity, vy, wobbleAmp, wobbleSpeed, rotSpeed;
-    var shape = SHAPES[randInt(0, SHAPES.length - 1)];
-
-    if (isNear) {
-      // Large foreground petals — slow, very visible
-      w = rand(52, 82);
-      h = rand(44, 70);
-      opacity = rand(0.90, 0.98);
-      vy = rand(1.0, 1.8);
-      wobbleAmp = rand(0.4, 1.0);
-      wobbleSpeed = rand(0.010, 0.022);
-      rotSpeed = rand(-0.9, 0.9);
-    } else {
-      // Small background petals — faster, translucent
-      w = rand(14, 30);
-      h = rand(12, 26);
-      opacity = rand(0.38, 0.62);
-      vy = rand(2.2, 3.8);
-      wobbleAmp = rand(0.8, 2.0);
-      wobbleSpeed = rand(0.025, 0.050);
-      rotSpeed = rand(-2.0, 2.0);
-    }
-
+    var w = randBetween(18, 34);
+    var h = randBetween(28, 50);
     var el = document.createElement('div');
-    el.className = isNear ? 'petal petal-near' : 'petal petal-far';
+    el.className = 'petal';
     el.style.width  = w + 'px';
     el.style.height = h + 'px';
-    el.style.borderRadius = shape;
-
-    var startX = rand(-30, window.innerWidth + 30);
+    el.style.opacity = randBetween(0.7, 0.95);
+    var startX = randBetween(0, window.innerWidth);
     el.style.left = startX + 'px';
-    el.style.top  = '-90px';
+    el.style.top  = '-60px';
     container.appendChild(el);
-
     petals.push({
       el: el,
       x: startX,
-      y: -90,
-      vy: vy,
-      vx: rand(-0.35, 0.35),
-      rot: rand(0, 360),
-      rotV: rotSpeed,
-      wobble: rand(0, Math.PI * 2),
-      wobbleSpeed: wobbleSpeed,
-      wobbleAmp: wobbleAmp,
-      opacity: opacity,
-      maxOpacity: opacity,
-      isNear: isNear
+      y: -60,
+      vy: randBetween(1.4, 2.6),
+      vx: randBetween(-0.5, 0.5),
+      rot: randBetween(0, 360),
+      rotV: randBetween(-1.8, 1.8),
+      wobble: randBetween(0, Math.PI * 2),
+      wobbleSpeed: randBetween(0.015, 0.04),
+      wobbleAmp: randBetween(0.5, 1.4),
+      opacity: randBetween(0.7, 0.95)
     });
   }
 
@@ -88,9 +52,7 @@
       lastSpawn = now;
     }
 
-    var fadeStart = TOTAL_DURATION - 1400;
     var surviving = [];
-
     for (var i = 0; i < petals.length; i++) {
       var p = petals[i];
       p.wobble += p.wobbleSpeed;
@@ -98,18 +60,17 @@
       p.y += p.vy;
       p.rot += p.rotV;
 
+      var fadeStart = TOTAL_DURATION - 1200;
       if (elapsed > fadeStart) {
-        var fadeProgress = (elapsed - fadeStart) / 1400;
-        p.opacity = Math.max(0, p.maxOpacity * (1 - fadeProgress));
+        p.opacity = Math.max(0, p.opacity - 0.012);
       }
 
-      if (p.y > window.innerHeight + 60 || p.opacity <= 0.01) {
+      if (p.y > window.innerHeight + 40 || p.opacity <= 0) {
         if (p.el.parentNode) p.el.parentNode.removeChild(p.el);
         continue;
       }
 
-      var dx = p.x - parseFloat(p.el.style.left);
-      p.el.style.transform = 'translate(' + dx + 'px,' + p.y + 'px) rotate(' + p.rot + 'deg)';
+      p.el.style.transform = 'translate(' + (p.x - parseFloat(p.el.style.left)) + 'px, ' + p.y + 'px) rotate(' + p.rot + 'deg)';
       p.el.style.opacity = p.opacity;
       surviving.push(p);
     }

@@ -240,22 +240,23 @@ function _submitToFormspree(paymentMethod) {
 
   var url = (window.landingConfig && window.landingConfig.formspreeUrl) || 'https://formspree.io/f/xeewabvz';
 
+  var formData = new FormData();
+  formData.append('_subject', 'Депозит ' + total.toLocaleString('ru-RU') + ' ₽ — ' + paymentMethod);
+  formData.append('_replyto', email);
+  formData.append('Дата и время', dateStr);
+  formData.append('Имя', name);
+  formData.append('Телефон', phone);
+  formData.append('Email', email);
+  formData.append('Состав заказа', summary);
+  formData.append('Итого', total.toLocaleString('ru-RU') + ' ₽');
+  formData.append('Способ оплаты', paymentMethod);
+  formData.append('Статус оплаты', status);
+  formData.append('Пожелание', msg);
+
   fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({
-      _subject: 'Депозит ' + total.toLocaleString('ru-RU') + ' ₽ — ' + paymentMethod,
-      _cc: email,
-      'Дата и время': dateStr,
-      Имя: name,
-      Телефон: phone,
-      Email: email,
-      Состав: summary,
-      Итого: total.toLocaleString('ru-RU') + ' ₽',
-      'Способ оплаты': paymentMethod,
-      'Статус оплаты': status,
-      Пожелание: msg
-    })
+    headers: { 'Accept': 'application/json' },
+    body: formData
   })
   .then(function (r) { return r.json(); })
   .then(function (data) {
