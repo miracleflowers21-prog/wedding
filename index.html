@@ -172,9 +172,12 @@
     <p class="section-label" style="text-align:center">Оформление</p>
     <h2 class="section-heading">Ваши данные</h2>
     <div class="form-box">
-      <div class="selected-summary" id="selDisplay">
-        <span id="selLabel">Сертификат</span>
-        <span class="selected-summary-price" id="selPrice">—</span>
+      <div class="form-group">
+        <label class="form-label">Сумма депозита</label>
+        <div class="amount-field" id="selDisplay">
+          <span id="selLabel">Выберите сертификат выше ↑</span>
+          <span class="selected-summary-price" id="selPrice"></span>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Ваше имя</label>
@@ -186,13 +189,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="gEmail" placeholder="your@email.ru" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Сумма депозита</label>
-        <select class="form-input form-select" id="certAmt" onchange="syncSel(this)">
-          <option value="">— выберите сертификат —</option>
-        </select>
+        <input class="form-input" type="email" id="gEmail" placeholder="your@email.ru" autocomplete="email" required>
       </div>
       <div class="form-group">
         <label class="form-label">Пожелание</label>

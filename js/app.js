@@ -76,10 +76,8 @@ function setFontSize(id, val) { var el = document.getElementById(id); if (el && 
 // ── Cert cards ────────────────────────────────────────────────────────────
 function buildCerts() {
   var grid = document.getElementById('certsGrid');
-  var sel  = document.getElementById('certAmt');
   if (!grid || !D.certs) return;
   grid.innerHTML = '';
-  if (sel) sel.innerHTML = '<option value="">— выберите сертификат —</option>';
 
   D.certs.forEach(function (c, i) {
     var fmt = parseInt(c.amount).toLocaleString('ru-RU');
@@ -96,9 +94,9 @@ function buildCerts() {
         '<button class="qty-btn" onclick="chQty(this,-1)">−</button>' +
         '<div class="qty-val">1</div>' +
         '<button class="qty-btn" onclick="chQty(this,1)">+</button>' +
-      '</div>';
+      '</div>' +
+      '<button class="cert-buy-btn" onclick="event.stopPropagation();selectCert(this.closest(\'.cert-card\'))">Купить</button>';
     grid.appendChild(card);
-    if (sel) sel.innerHTML += '<option value="' + c.amount + '">' + fmt + ' ₽</option>';
   });
 }
 
@@ -108,8 +106,6 @@ function selectCert(el) {
   el.classList.add('selected');
   selAmt = el.dataset.amount;
   selQty = parseInt(el.querySelector('.qty-val').textContent) || 1;
-  var sel = document.getElementById('certAmt');
-  if (sel) sel.value = selAmt;
   updateSum();
   var form = document.getElementById('order-form');
   if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -124,14 +120,19 @@ function chQty(btn, d) {
 }
 
 function updateSum() {
-  if (!selAmt) return;
-  var t = parseInt(selAmt) * selQty;
-  var lbl = document.getElementById('selLabel');
+  var lbl   = document.getElementById('selLabel');
   var price = document.getElementById('selPrice');
-  var disp = document.getElementById('selDisplay');
+  var disp  = document.getElementById('selDisplay');
+  if (!selAmt) {
+    if (lbl) lbl.textContent = 'Выберите сертификат выше ↑';
+    if (price) price.textContent = '';
+    if (disp) disp.classList.remove('has-selection');
+    return;
+  }
+  var t = parseInt(selAmt) * selQty;
   if (lbl) lbl.textContent = selQty > 1 ? selQty + ' × ' + parseInt(selAmt).toLocaleString('ru-RU') + ' ₽' : 'Сертификат';
   if (price) price.textContent = t.toLocaleString('ru-RU') + ' ₽';
-  if (disp) disp.style.display = 'flex';
+  if (disp) disp.classList.add('has-selection');
 }
 
 function syncSel(s) {
@@ -149,12 +150,12 @@ function syncSel(s) {
 function submitForm() {
   var name  = (document.getElementById('gName')  || {}).value || '';
   var phone = (document.getElementById('gPhone') || {}).value || '';
-  var amt   = (document.getElementById('certAmt') || {}).value || '';
+  var email = (document.getElementById('gEmail') || {}).value || '';
   var trap  = (document.getElementById('_trap')  || {}).value || '';
 
   if (trap) return; // honeypot triggered
-  if (!name.trim() || !phone.trim() || !amt) {
-    alert('Пожалуйста, заполните имя, телефон и выберите сумму депозита.');
+  if (!name.trim() || !phone.trim() || !email.trim() || !selAmt) {
+    alert('Пожалуйста, заполните имя, телефон, email и выберите сертификат.');
     return;
   }
   openPayModal();

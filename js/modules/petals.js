@@ -17,29 +17,29 @@
   function randBetween(a, b) { return a + Math.random() * (b - a); }
 
   function spawnPetal() {
-    var w = randBetween(7, 16);
-    var h = randBetween(11, 20);
+    var w = randBetween(18, 34);
+    var h = randBetween(28, 50);
     var el = document.createElement('div');
     el.className = 'petal';
     el.style.width  = w + 'px';
     el.style.height = h + 'px';
-    el.style.opacity = randBetween(0.65, 0.95);
+    el.style.opacity = randBetween(0.7, 0.95);
     var startX = randBetween(0, window.innerWidth);
     el.style.left = startX + 'px';
-    el.style.top  = '-30px';
+    el.style.top  = '-60px';
     container.appendChild(el);
     petals.push({
       el: el,
       x: startX,
-      y: -30,
-      vy: randBetween(1.8, 3.2),
-      vx: randBetween(-0.6, 0.6),
+      y: -60,
+      vy: randBetween(1.4, 2.6),
+      vx: randBetween(-0.5, 0.5),
       rot: randBetween(0, 360),
-      rotV: randBetween(-2.5, 2.5),
+      rotV: randBetween(-1.8, 1.8),
       wobble: randBetween(0, Math.PI * 2),
-      wobbleSpeed: randBetween(0.02, 0.05),
-      wobbleAmp: randBetween(0.3, 0.9),
-      opacity: randBetween(0.65, 0.95)
+      wobbleSpeed: randBetween(0.015, 0.04),
+      wobbleAmp: randBetween(0.5, 1.4),
+      opacity: randBetween(0.7, 0.95)
     });
   }
 
